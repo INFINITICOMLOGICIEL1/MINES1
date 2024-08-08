@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Diamants</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000; /* Fond noir */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #fff; /* Couleur du texte en blanc */
+            text-align: center; /* Centrer le titre */
+        }
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(5, 50px);
+            grid-template-rows: repeat(5, 50px);
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: #ffd700; /* Couleur jaune or */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #000; /* Couleur du texte en noir */
+            border-radius: 5px;
+            transition: transform 0.5s ease; /* Transition pour rotation */
+        }
+        .rotate {
+            animation: rotate 2s ease forwards; /* Animation de rotation de 2 secondes */
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #fff; /* Couleur du texte en blanc */
+        }
+        #countdown {
+            margin-top: 10px;
+            font-size: 20px;
+            color: #ffd700; /* Couleur jaune or pour le compte à rebours */
+        }
+        #resetBtn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #ffd700; /* Bouton en jaune or */
+            color: #000; /* Texte du bouton en noir */
+            border: none; /* Pas de bordure */
+            border-radius: 5px; /* Coins arrondis du bouton */
+        }
+        #resetBtn:disabled {
+            background-color: #aaa; /* Couleur du bouton désactivé */
+            cursor: not-allowed; /* Curseur de non-autorisé */
+        }
+    </style>
+</head>
+<body>
+    <h1>MINES BY INFINITI COM LOGICIEL</h1>
+    <div id="grid"></div>
+    <div id="status"></div>
+    <div id="countdown"></div> <!-- Élément pour afficher le compte à rebours -->
+    <button id="resetBtn">Relancer le Jeu</button>
+    <script>
+        const gridSize = 5;
+        const diamondCount = 4;
+        let grid;
+
+        function initGame() {
+            grid = Array(gridSize).fill().map(() => Array(gridSize).fill('🟦'));
+            placeDiamonds();
+            createGrid();
+            document.getElementById('status').innerText = 'Le jeu commence !';
+            document.getElementById('countdown').innerText = ''; // Réinitialiser le compte à rebours
+        }
+
+        function placeDiamonds() {
+            let placedDiamonds = 0;
+            while (placedDiamonds < diamondCount) {
+                const x = Math.floor(Math.random() * gridSize);
+                const y = Math.floor(Math.random() * gridSize);
+                if (grid[x][y] !== '💎') {
+                    grid[x][y] = '💎';
+                    placedDiamonds++;
+                }
+            }
+        }
+
+        function createGrid() {
+            const gridElement = document.getElementById('grid');
+            gridElement.innerHTML = '';
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = 0; y < gridSize; y++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.innerText = grid[x][y];
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        function animateDiamonds() {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach((cell) => {
+                if (cell.innerText === '💎') {
+                    cell.classList.add('rotate'); // Ajouter la classe d'animation
+                }
+            });
+
+            // Retirer l'animation après 2 secondes pour pouvoir la réappliquer
+            setTimeout(() => {
+                cells.forEach((cell) => {
+                    cell.classList.remove('rotate');
+                });
+            }, 2000); // Temps d'attente de 2 secondes
+        }
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            document.getElementById('resetBtn').disabled = true; // Désactiver le bouton
+            document.getElementById('status').innerText = 'Attendez 30 secondes...'; // Message pour informer l'utilisateur
+
+            let timeLeft = 30; // 30 secondes de compte à rebours
+            const countdownDisplay = document.getElementById('countdown');
+            countdownDisplay.innerText = `Temps restant: ${timeLeft} secondes`;
+
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                countdownDisplay.innerText = `Temps restant: ${timeLeft} secondes`;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    document.getElementById('resetBtn').disabled = false; // Réactiver le bouton
+                    countdownDisplay.innerText = ''; // Effacer le compte à rebours
+                }
+            }, 1000); // Mise à jour toutes les secondes
+
+            animateDiamonds(); // Animer les diamants avant de relancer le jeu
+            setTimeout(() => {
+                initGame(); // Relancer le jeu après l'animation
+            }, 2000); // Attendre la fin de l'animation de 2 secondes
+        });
+
+        initGame(); // Initialisation du jeu au chargement
+    </script>
+</body>
+</html>
